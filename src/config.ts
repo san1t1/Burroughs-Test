@@ -5,3 +5,5 @@ export const pathToSchema = resolvePath(
   '..',
   'payroll-dates.openapi.yaml',
 );
+
+export const isProduction = process.env.NODE_ENV === 'production';

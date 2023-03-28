@@ -22,7 +22,29 @@ describe('AppController (e2e)', () => {
   it('/ (GET)', () => {
     return request(app.getHttpServer())
       .get('/')
-      .expect(200)
-      .expect('Hello World!');
+      .expect(404)
+      .expect({
+        name: 'Not Found',
+        status: 404,
+        path: '/',
+        errors: [{ path: '/', message: 'not found' }],
+      });
+  });
+
+  it('correctly validates requests against the schema', () => {
+    return request(app.getHttpServer())
+      .get('/payroll-dates?unacceptable=query')
+      .expect(400)
+      .expect({
+        name: 'Bad Request',
+        status: 400,
+        path: '/query/unacceptable',
+        errors: [
+          {
+            path: '/query/unacceptable',
+            message: "Unknown query parameter 'unacceptable'",
+          },
+        ],
+      });
   });
 });
