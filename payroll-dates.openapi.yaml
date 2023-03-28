@@ -1,0 +1,112 @@
+openapi: 3.0.3
+info:
+  title: Payroll date calculator
+  description: Provides the dates on which monthly bonus and salary payments should be made
+  version: 1.0.0
+
+servers:
+  - url: "/"
+
+paths:
+  /schema:
+    get:
+      tags: [Info]
+      description: Returns this schema
+      responses:
+        200:
+          description: The dates on which payments should be made
+          content:
+            application/openapi+yaml:
+              schema:
+                type: string
+
+  /payroll-dates/{year}/{month}/{day}:
+    get:
+      tags: [API]
+      parameters:
+        - $ref: "#/components/parameters/year"
+        - $ref: "#/components/parameters/month"
+        - $ref: "#/components/parameters/day"
+        - $ref: "#/components/parameters/months"
+      description: |
+        ## Payroll dates
+
+        Provide the dates on which employees should be paid.
+
+        This can be retrieved either as JSON, or as a CSV file which will not contain a header row, and be in the following format:
+        ```
+        yyyy/mm/dd,base
+        yyyy/mm/dd,bonus
+        ```
+
+      responses:
+        200:
+          description: The dates on which payments should be made
+          content:
+            text/csv:
+              schema:
+                type: string
+                example: "yyyy/mm/dd,base"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/payments"
+
+components:
+  schemas:
+    payments:
+      type: array
+      items:
+        type: object
+        additionalProperties: false
+        properties:
+          date:
+            description: The payroll date, in yyyy/mm/dd format
+            type: string
+            pattern: ^2\d{3}\/(0[1-9]|1[012])\/(0[1-9]|[12][0-9]|3[01])$
+          type:
+            type: string
+            enum: [base, bonus]
+
+  parameters:
+    year:
+      in: path
+      name: year
+      description: |
+        The year from which dates should be calculated
+      example: "2023"
+      required: true
+      schema:
+        type: string
+        pattern: ^2\d{3}$
+    month:
+      in: path
+      name: month
+      description: |
+        The month from which dates should be calculated. This should always include two digits
+      example: "02"
+      required: true
+      schema:
+        type: string
+        pattern: ^(0[1-9]|1[012])$
+    day:
+      in: path
+      name: day
+      description: |
+        The month from which dates should be calculated. This should always include two digits
+      example: "02"
+      required: true
+      schema:
+        type: string
+        pattern: ^(0[1-9]|[12][0-9]|3[01])$
+    months:
+      in: query
+      name: months
+      description: |
+        The number of months to calculate. No more then 10 years of data can be retrieved at once
+
+        _If not supplied, the next 12 months of payments will be produced_
+      required: false
+      example: 12
+      schema:
+        type: integer
+        maximum: 120
