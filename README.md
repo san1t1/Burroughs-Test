@@ -1,73 +1,56 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Payroll Dates Calculator
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-  
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Tech test Response.
 
-## Description
+## Contains
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- A NestJS server - it's my first ever attempt at Nest, I kinda like it. Especially that you still have access to all the express stuff under the hood.
+There's things I don't like about the template app it creates, but that's often the case with these 'get you started quick' pieces. Anyway, this took me a bit longer than knocking something up with express snippets I had lying around.
+- A Very Ugly React App - I'm not a UX guy, and I was kinda running out of the time I wanted to spend, so I've done no styling, and no tests. Oh well. Not my best work, but it only took an hour or so to get done
+- A production minded docker image can be built.
 
-## Installation
+## Design Decisions
 
-```bash
-$ npm install
-```
+- The API can return either `text/csv` or `application/json` depending on the `Accept` header. Standard content-negotiation stuff.
+- This is contract first, so the API doc is handwritten, and not generated from code. This allows much more precise validation in my experience.
+- There's a gotcha in this challenge around timezones and daylight saving and all that, especially where server is probably UTC timezone and client is not. As the business logic is not time sensitive, and no mention of how to approach this in the requirements.
+I've largely side stepped the issue. Instead of taking a single 'date' parameter in the API, the route is `GET /payroll-dates/year/month/day`, and equally, the response, both in JSON and CSV form, uses `YYYY/MM/DD`. Internally where `Date` is used, the time is set to midday to avoid daylight saving problems.
 
-## Running the app
+## Running the thing
+
+To keep things simple, I've packaged it all up into docker compose, so if all is good you should just be able to run `docker-compose up` and it 'just works'
+
+You've got these routes:
+
+- [http://127.0.0.1:5000/](http://127.0.0.1:5000/) - the react app, consuming the api. I've just built it in the multi-stage docker build, and serve it statically.
+- [http://127.0.0.1:5000/api-docs](http://127.0.0.1:5000/api-docs) - Swagger docs. The 'Try it out' button should be functional.
+- [http://127.0.0.1:5000/schema](http://127.0.0.1:5000/schema) - The raw OpenAPI schema. I just kinda like to do this, but it might be overkill. I'll normally have an unauthenticated `/version` route as well.
+
+## Tests
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+cd server
+npm install
+npm run test
+npm run test:e2e
 ```
 
-## Test
+Just failed to get to do any client tests. Ran out of time. Also I'd generally look to combine those two test steps and run once in CI. See above comment on the Nest template.
+
+### Development
+
+You'll need two terminals. In the first
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+cd server
+npm install
+npm run start:dev
 ```
 
-## Support
+And in the second
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-  Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```bash
+cd client
+npm install
+npm run start
+```
