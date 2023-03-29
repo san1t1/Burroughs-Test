@@ -1,0 +1,9 @@
+version: '3.7'
+services:
+    payroll-dates:
+        build:
+            context: ./
+            dockerfile: app.Dockerfile
+        ports:
+            - 5000:5000
+        
