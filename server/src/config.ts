@@ -7,4 +7,6 @@ export const pathToSchema = resolvePath(
   'payroll-dates.openapi.yaml',
 );
 
+export const pathToStaticAssets = resolvePath(__dirname, '..', 'public');
+
 export const isProduction = process.env.NODE_ENV === 'production';
